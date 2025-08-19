@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "./setup-dev.sh",
+    "db:start": "npx supabase start",
+    "db:stop": "npx supabase stop",
+    "db:reset": "npx supabase db reset",
+    "db:migrate": "npx supabase db push",
+    "db:generate-types": "npx supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.7",

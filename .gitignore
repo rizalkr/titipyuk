@@ -26,7 +26,7 @@
 # SANGAT PENTING! File ini berisi kunci API dan rahasia lainnya.
 # JANGAN PERNAH MASUKKAN FILE INI KE GIT.
 .env.local
-.env.development.local
+.env.local.development
 .env.production.local
 .env.test.local
 .env
