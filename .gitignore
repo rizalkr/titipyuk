@@ -1,0 +1,70 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+# ----------------------------------------------------------------
+# Folder ini berisi semua library pihak ketiga, ukurannya sangat besar
+# dan bisa di-install ulang kapan saja dengan 'npm install'.
+/node_modules
+
+# Next.js build artifacts
+# ----------------------------------------------------------------
+# Folder ini dibuat oleh Next.js saat build dan development, berisi cache dan output.
+/.next/
+/out/
+
+# Production build files
+# ----------------------------------------------------------------
+.vercel
+/build
+
+# Static exports
+# ----------------------------------------------------------------
+/export
+
+# Environment variables
+# ----------------------------------------------------------------
+# SANGAT PENTING! File ini berisi kunci API dan rahasia lainnya.
+# JANGAN PERNAH MASUKKAN FILE INI KE GIT.
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+.env
+
+# Log files
+# ----------------------------------------------------------------
+# File log dari proses development atau error.
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor directories and files
+# ----------------------------------------------------------------
+# File konfigurasi spesifik untuk text editor Anda (VSCode, WebStorm, dll).
+.vscode
+.idea
+.sublime-project
+.sublime-workspace
+
+# OS-generated files
+# ----------------------------------------------------------------
+# File sampah yang dibuat oleh sistem operasi.
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Test & coverage reports
+# ----------------------------------------------------------------
+# Output dari proses testing.
+/coverage
+.nyc_output
+
+# Miscellaneous
+# ----------------------------------------------------------------
+# File hasil kompilasi TypeScript
+*.tsbuildinfo
