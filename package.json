@@ -11,7 +11,9 @@
     "db:start": "npx supabase start",
     "db:stop": "npx supabase stop",
     "db:reset": "npx supabase db reset",
-    "db:migrate": "npx supabase db push",
+    "db:migrate": "npx supabase migration up",
+    "db:migrate:remote": "npx supabase db push",
+    "db:link": "supabase link --project-ref $PROJECT_REF",
     "db:generate-types": "npx supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "@supabase/supabase-js": "^2.38.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "crypto": "^1.0.1",
     "lucide-react": "^0.294.0",
     "next": "^14.2.32",
     "openai": "^5.12.2",
