@@ -28,7 +28,7 @@ function getServerClient() {
 export async function serverSignIn(email: string, password: string) {
   const supabase = getServerClient()
   const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-  return { user: data?.user ?? null, error }
+  return { user: data?.user ?? null, session: data?.session ?? null, error }
 }
 
 export async function serverSignUp(email: string, password: string, fullName?: string) {
@@ -38,7 +38,7 @@ export async function serverSignUp(email: string, password: string, fullName?: s
     password,
     options: fullName ? { data: { full_name: fullName } } : undefined,
   })
-  return { user: data?.user ?? null, error }
+  return { user: data?.user ?? null, session: data?.session ?? null, error }
 }
 
 export async function serverSignOut() {

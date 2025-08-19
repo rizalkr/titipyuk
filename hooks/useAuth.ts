@@ -12,79 +12,60 @@ export function useAuth() {
   useEffect(() => {
     let isMounted = true
 
-    // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession()
-        
-        if (error) {
-          console.error('Error getting session:', error)
-        }
-
         if (isMounted) {
           setSession(session)
           setUser(session?.user ?? null)
           setLoading(false)
         }
       } catch (error) {
-        console.error('Error in getInitialSession:', error)
-        if (isMounted) {
-          setLoading(false)
-        }
+        if (isMounted) setLoading(false)
       }
     }
-
     getInitialSession()
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (isMounted) {
         setSession(session)
         setUser(session?.user ?? null)
-        setLoading(false)
       }
     })
 
-    return () => {
-      isMounted = false
-      subscription.unsubscribe()
-    }
+    return () => { isMounted = false; subscription.unsubscribe() }
   }, [])
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    return await serverSignUp(email, password, fullName)
+    const { user, session, error } = await serverSignUp(email, password, fullName)
+    if (!error && session) {
+      // Ensure client supabase stores new session (especially after project switch)
+      await supabase.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token })
+      setSession(session as any)
+      setUser(user as any)
+    }
+    return { user, error }
   }
 
   const signIn = async (email: string, password: string) => {
-    // Use server action to set cookies, then refresh local session
-    const result = await serverSignIn(email, password)
-    if (!result.error) {
-      // Sync client supabase (optional, will update via onAuthStateChange if cookies trigger page reload)
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
+    const { user, session, error } = await serverSignIn(email, password)
+    if (!error && session) {
+      await supabase.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token })
+      setSession(session as any)
+      setUser(user as any)
     }
-    return result
+    return { error }
   }
 
   const signOut = async () => {
     const { error } = await serverSignOut()
     if (!error) {
+      await supabase.auth.signOut()
       setUser(null)
       setSession(null)
     }
     return { error }
   }
 
-  return {
-    user,
-    session,
-    loading: loading || isPending,
-    signUp,
-    signIn,
-    signOut,
-  }
+  return { user, session, loading: loading || isPending, signUp, signIn, signOut }
 }

@@ -24,12 +24,21 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Refresh / hydrate session
+  // Refresh / hydrate session (may return stale cached session if project recently switched)
   const {
     data: { session },
   } = await supabase.auth.getSession()
 
-  const user = session?.user || null
+  let user = session?.user || null
+
+  // EXTRA VALIDATION: verify user is valid on remote project. If tokens from old project, this will fail.
+  if (user) {
+    const { data: userCheck, error: userErr } = await supabase.auth.getUser()
+    if (userErr || !userCheck?.user) {
+      user = null
+      // Optional: could clear cookies here if needed (left as-is to avoid side effects per request)
+    }
+  }
 
   const protectedPaths = ['/dashboard', '/booking', '/checkout', '/confirmation']
   const authPaths = ['/login', '/signup']
