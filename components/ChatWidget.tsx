@@ -27,6 +27,7 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false)
   const [streamMode, setStreamMode] = useState(true)
   const [conversationId, setConversationId] = useState<string | null>(null)
+  const [loadingHistory, setLoadingHistory] = useState(false)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -112,6 +113,18 @@ export default function ChatWidget() {
     }
   }
 
+  const loadHistory = async () => {
+    if (!conversationId || loadingHistory) return
+    setLoadingHistory(true)
+    try {
+      const res = await fetch(`/api/chat/history?conversationId=${conversationId}`)
+      const data = await res.json()
+      if (Array.isArray(data.messages)) {
+        setMessages(data.messages as ChatMessage[])
+      }
+    } catch {/* ignore */} finally { setLoadingHistory(false) }
+  }
+
   return (
     <>
       <button
@@ -133,8 +146,11 @@ export default function ChatWidget() {
             </button>
           </div>
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 text-sm">
-            {messages.length === 0 && (
+            {messages.length === 0 && !conversationId && (
               <div className="text-muted-foreground text-xs">Tanya apa aja soal TitipYuk (harga, proses, dsb). 🙌</div>
+            )}
+            {messages.length === 0 && conversationId && (
+              <button onClick={loadHistory} className="text-xs underline text-primary disabled:opacity-50" disabled={loadingHistory}>{loadingHistory ? 'Memuat...' : 'Muat riwayat percakapan'}</button>
             )}
             {messages.map((m, i) => (
               <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
