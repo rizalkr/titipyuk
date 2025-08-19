@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { randomUUID } from 'crypto'
 
 function buildSiteContext() {
   return `KONTEKS TITIPYUK (STREAM): Jawab hanya terkait penitipan TitipYuk, gaya santai, jangan keluar topik.`
@@ -17,13 +16,24 @@ function createSupabaseForServer() {
   )
 }
 
+// Helper for edge-safe UUID
+function genId() {
+  if (typeof crypto !== 'undefined' && (crypto as any).randomUUID) return (crypto as any).randomUUID()
+  // Fallback simple UUID v4-ish
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = Math.random() * 16 | 0
+    const v = c === 'x' ? r : (r & 0x3 | 0x8)
+    return v.toString(16)
+  })
+}
+
 export const runtime = 'edge'
 
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}))
     const userMessages = Array.isArray(body.messages) ? body.messages : []
-    const conversationId = body.conversationId || randomUUID()
+    const conversationId = body.conversationId || genId()
 
     const supabase = createSupabaseForServer()
     const { data: sessionData } = await supabase.auth.getSession()
