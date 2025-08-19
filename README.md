@@ -128,6 +128,16 @@ Fitur:
 
 ## Custom Email OTP (Mailry)
 
+Env yang diperlukan untuk pengiriman real via Mailry:
+- MAILRY_API_KEY
+- MAILRY_API_BASE (default https://api.mailry.co)
+- MAILRY_SENDER_EMAIL_ID (UUID mailbox aktif dari endpoint GET /ext/email)
+- MAILRY_FROM_NAME (opsional)
+
+Helper: `sendMailryEmail` di `lib/mailry.ts` memanggil `/ext/inbox/send`.
+
+Jika salah satu kredensial belum diisi, sistem tetap membuat OTP & hanya skip kirim email (untuk testing) + bisa expose `devCode` bila `ALLOW_DEV_OTP_RESPONSE=true` (jangan aktifkan di production).
+
 Alur verifikasi email kustom menggantikan email konfirmasi default Supabase:
 1. User signup -> server action `serverSignUp` otomatis memanggil endpoint `/api/auth/request-otp` (jika belum verified).
 2. OTP (6 digit numeric) disimpan hashed (`bcrypt`) di tabel `email_otp_tokens` dengan masa berlaku 10 menit.

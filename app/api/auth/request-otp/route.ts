@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import bcrypt from 'bcryptjs'
+import { sendMailryEmail } from '@/lib/mailry'
 
 function createClient() {
   const cookieStore = cookies()
@@ -28,7 +29,7 @@ export async function POST(req: Request) {
     if (!email) return NextResponse.json({ error: 'Email wajib diisi' }, { status: 400 })
 
     // Lookup profile
-    const { data: profile } = await supabase.from('profiles').select('id, email_verified').eq('email', email).single()
+    const { data: profile } = await supabase.from('profiles').select('id, email_verified').eq('email', email).maybeSingle()
     if (!profile?.id) {
       return NextResponse.json({ error: 'User belum terdaftar' }, { status: 400 })
     }
@@ -60,29 +61,25 @@ export async function POST(req: Request) {
       expires_at: expiresAt,
     })
 
-    const MAILRY_KEY = process.env.MAILRY_API_KEY
-    if (!MAILRY_KEY) {
-      console.warn('MAILRY_API_KEY not set, skipping actual email send')
+    // Send via Mailry helper
+    let delivered = false
+    let sendError: string | undefined
+    const haveMailryConfig = !!process.env.MAILRY_API_KEY && !!process.env.MAILRY_SENDER_EMAIL_ID
+    if (haveMailryConfig) {
+      const res = await sendMailryEmail({
+        to: email,
+        subject: 'Kode Verifikasi TitipYuk',
+        htmlBody: `<p>Halo,<br/>Kode verifikasi kamu: <b>${code}</b><br/>Berlaku 10 menit.<br/><br/>TitipYuk</p>`,
+        plainBody: `Kode verifikasi kamu: ${code} (berlaku 10 menit)`
+      })
+      delivered = res.ok
+      if (!res.ok) sendError = res.error || 'Gagal kirim email'
     } else {
-      try {
-        await fetch('https://api.mailry.co/v1/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${MAILRY_KEY}`,
-          },
-          body: JSON.stringify({
-            to: email,
-            subject: 'Kode Verifikasi TitipYuk',
-            text: `Kode verifikasi kamu: ${code} (berlaku 10 menit)`,
-          })
-        })
-      } catch (e) {
-        console.warn('Failed sending OTP email', e)
-      }
+      console.warn('Mailry config missing (MAILRY_API_KEY / MAILRY_SENDER_EMAIL_ID), skip send')
     }
 
-    return NextResponse.json({ ok: true })
+    const devExpose = process.env.ALLOW_DEV_OTP_RESPONSE === 'true' && process.env.NODE_ENV !== 'production'
+    return NextResponse.json({ ok: true, delivered, ...(sendError ? { sendError } : {}), ...(devExpose ? { devCode: code } : {}) })
   } catch (e: any) {
     return NextResponse.json({ error: e.message || 'Server error' }, { status: 500 })
   }
