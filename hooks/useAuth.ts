@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { serverSignIn, serverSignUp, serverSignOut } from '@/app/actions/auth'
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
     let isMounted = true
@@ -54,33 +56,23 @@ export function useAuth() {
   }, [])
 
   const signUp = async (email: string, password: string, fullName?: string) => {
-    console.log('Attempting signup with:', { email, fullName })
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: fullName ? {
-        data: {
-          full_name: fullName
-        }
-      } : undefined
-    })
-    
-    console.log('Signup result:', { data, error })
-    return { data, error }
+    return await serverSignUp(email, password, fullName)
   }
 
   const signIn = async (email: string, password: string) => {
-    console.log('Attempting signin with:', { email })
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    console.log('Signin result:', { data, error })
-    return { data, error }
+    // Use server action to set cookies, then refresh local session
+    const result = await serverSignIn(email, password)
+    if (!result.error) {
+      // Sync client supabase (optional, will update via onAuthStateChange if cookies trigger page reload)
+      const { data: { session } } = await supabase.auth.getSession()
+      setSession(session)
+      setUser(session?.user ?? null)
+    }
+    return result
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
+    const { error } = await serverSignOut()
     if (!error) {
       setUser(null)
       setSession(null)
@@ -91,7 +83,7 @@ export function useAuth() {
   return {
     user,
     session,
-    loading,
+    loading: loading || isPending,
     signUp,
     signIn,
     signOut,

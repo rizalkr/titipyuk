@@ -30,13 +30,13 @@ export default function Navigation() {
                 href="/#features"
                 className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium"
               >
-                Features
+                Fitur
               </Link>
               <Link
                 href="/#pricing"
                 className="text-muted-foreground hover:text-foreground px-3 py-2 rounded-md text-sm font-medium"
               >
-                Pricing
+                Harga
               </Link>
             </div>
           </div>
@@ -47,7 +47,7 @@ export default function Navigation() {
                 <Link href="/booking">
                   <Button variant="outline" size="sm">
                     <Package className="h-4 w-4 mr-2" />
-                    Book Storage
+                    Titip Barang
                   </Button>
                 </Link>
                 <Link href="/dashboard">
@@ -58,19 +58,19 @@ export default function Navigation() {
                 </Link>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
+                  Keluar
                 </Button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Link href="/login">
                   <Button variant="outline" size="sm">
-                    Login
+                    Masuk
                   </Button>
                 </Link>
                 <Link href="/signup">
                   <Button size="sm">
-                    Sign Up
+                    Daftar
                   </Button>
                 </Link>
               </div>

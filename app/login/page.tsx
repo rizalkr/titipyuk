@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,6 +18,8 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const { signIn } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirectTo') || '/dashboard'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,7 +27,7 @@ export default function LoginPage() {
     setError('')
 
     if (!email || !password) {
-      setError('Please fill in all fields')
+      setError('Isi semua field dulu ya')
       setLoading(false)
       return
     }
@@ -35,17 +37,17 @@ export default function LoginPage() {
 
       if (error) {
         if (error.message === 'Invalid login credentials') {
-          setError('Invalid email or password. Please try again.')
+          setError('Email atau password salah. Coba lagi ya.')
         } else if (error.message === 'Email not confirmed') {
-          setError('Please check your email and click the confirmation link before signing in.')
+          setError('Cek email kamu dan klik link konfirmasi dulu ya sebelum login.')
         } else {
           setError(error.message)
         }
       } else {
-        router.push('/')
+        router.replace(redirectTo)
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.')
+      setError('Terjadi error tak terduga. Coba lagi ya.')
     } finally {
       setLoading(false)
     }
@@ -63,9 +65,9 @@ export default function LoginPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
+            <CardTitle className="text-2xl font-bold">Welcome Back 👋</CardTitle>
             <CardDescription>
-              Sign in to your TitipYuk account to manage your stored items
+              Masuk ke akun TitipYuk kamu buat atur semua titipan barangmu
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -77,7 +79,7 @@ export default function LoginPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -86,7 +88,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Masukkan email kamu"
                 />
               </div>
 
@@ -101,7 +103,7 @@ export default function LoginPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
+                    placeholder="Masukkan password"
                   />
                   <button
                     type="button"
@@ -122,15 +124,15 @@ export default function LoginPage() {
                 className="w-full"
                 disabled={loading}
               >
-                {loading ? 'Signing In...' : 'Sign In'}
+                {loading ? 'Lagi masuk...' : 'Masuk'}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Don't have an account?{' '}
+                Belum punya akun?{' '}
                 <Link href="/signup" className="text-primary hover:text-primary/80 font-medium">
-                  Create one here
+                  Daftar dulu di sini
                 </Link>
               </p>
             </div>
@@ -139,7 +141,7 @@ export default function LoginPage() {
 
         <div className="text-center">
           <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Back to homepage
+            ← Kembali ke beranda
           </Link>
         </div>
       </div>

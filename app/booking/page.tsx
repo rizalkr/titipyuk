@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Calculator, Package, Calendar, Weight, Ruler, AlertTriangle } from 'lucide-react'
+import { toIDR } from '@/lib/utils'
 
 interface PriceCalculation {
   baseRate: number
@@ -22,8 +23,6 @@ interface PriceCalculation {
 export default function BookingPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  
-  // Form state
   const [itemType, setItemType] = useState<'normal' | 'fragile'>('normal')
   const [weight, setWeight] = useState<string>('')
   const [length, setLength] = useState<string>('')
@@ -31,8 +30,6 @@ export default function BookingPage() {
   const [height, setHeight] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
-  
-  // Calculated values
   const [volume, setVolume] = useState<number>(0)
   const [calculation, setCalculation] = useState<PriceCalculation | null>(null)
   const [isFormValid, setIsFormValid] = useState<boolean>(false)
@@ -80,9 +77,8 @@ export default function BookingPage() {
       const volumeSurcharge = (volume / 1000) * 0.01 * days // $0.01 per 1,000 cm³ per day
       const weightSurcharge = weightNum * 0.10 * days // $0.10 per kg per day
       
-      let subtotal = baseRate + volumeSurcharge + weightSurcharge
       const fragileMultiplier = itemType === 'fragile' ? 1.5 : 1.0
-      const totalPrice = subtotal * fragileMultiplier
+      const totalPrice = (baseRate + volumeSurcharge + weightSurcharge) * fragileMultiplier
       
       setCalculation({
         baseRate,
@@ -113,13 +109,11 @@ export default function BookingPage() {
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center">
           <Package className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-foreground mb-4">Access Denied</h1>
-          <p className="text-muted-foreground mb-8">
-            You need to be logged in to access the booking page.
-          </p>
-          <Button asChild>
-            <a href="/login">Login to Continue</a>
-          </Button>
+            <h1 className="text-3xl font-bold text-foreground mb-4">Akses Ditolak</h1>
+            <p className="text-muted-foreground mb-8">Kamu harus login dulu untuk akses halaman booking.</p>
+            <Button asChild>
+              <a href="/login">Login Dulu</a>
+            </Button>
         </div>
       </div>
     )
@@ -148,16 +142,15 @@ export default function BookingPage() {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Calculate Storage Price
+            Hitung Harga Penyimpanan
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Get an instant quote for storing your items with TitipYuk Semarang. 
-            Fill out the details below to see your personalized pricing.
+            Dapatkan estimasi biaya instan buat nitip barang kamu di TitipYuk Semarang. 
+            Isi detail di bawah ini buat lihat harga.
           </p>
         </div>
 
@@ -167,10 +160,10 @@ export default function BookingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5 text-primary" />
-                Item Details & Calculator
+                Detail Barang & Kalkulator
               </CardTitle>
               <CardDescription>
-                Provide your item details to calculate storage costs
+                Masukkan detail barang untuk hitung biaya
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -178,7 +171,7 @@ export default function BookingPage() {
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Item Type
+                  Jenis Barang
                 </Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div 
@@ -201,7 +194,7 @@ export default function BookingPage() {
                       <Label className="font-medium cursor-pointer">Normal</Label>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Standard items like clothes, books, documents
+                      Barang standar seperti pakaian, buku, dokumen
                     </p>
                   </div>
                   
@@ -226,7 +219,7 @@ export default function BookingPage() {
                     </div>
                     <div className="flex items-center gap-1 text-sm text-orange-600">
                       <AlertTriangle className="h-3 w-3" />
-                      Special handling (+50%)
+                      Perlakuan khusus (+50%)
                     </div>
                   </div>
                 </div>
@@ -236,12 +229,12 @@ export default function BookingPage() {
               <div className="space-y-2">
                 <Label htmlFor="weight" className="text-base font-semibold flex items-center gap-2">
                   <Weight className="h-4 w-4" />
-                  Item Weight (kg)
+                  Berat Barang (kg)
                 </Label>
                 <Input
                   id="weight"
                   type="number"
-                  placeholder="Enter weight in kg"
+                  placeholder="Masukkan berat (kg)"
                   value={weight}
                   onChange={(e) => setWeight(e.target.value)}
                   min="0"
@@ -254,15 +247,15 @@ export default function BookingPage() {
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Ruler className="h-4 w-4" />
-                  Item Dimensions (cm)
+                  Dimensi Barang (cm)
                 </Label>
                 <div className="grid grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="length" className="text-sm text-muted-foreground">Length</Label>
+                    <Label htmlFor="length" className="text-sm text-muted-foreground">Panjang</Label>
                     <Input
                       id="length"
                       type="number"
-                      placeholder="L"
+                      placeholder="P"
                       value={length}
                       onChange={(e) => setLength(e.target.value)}
                       min="0"
@@ -270,11 +263,11 @@ export default function BookingPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="width" className="text-sm text-muted-foreground">Width</Label>
+                    <Label htmlFor="width" className="text-sm text-muted-foreground">Lebar</Label>
                     <Input
                       id="width"
                       type="number"
-                      placeholder="W"
+                      placeholder="L"
                       value={width}
                       onChange={(e) => setWidth(e.target.value)}
                       min="0"
@@ -282,11 +275,11 @@ export default function BookingPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="height" className="text-sm text-muted-foreground">Height</Label>
+                    <Label htmlFor="height" className="text-sm text-muted-foreground">Tinggi</Label>
                     <Input
                       id="height"
                       type="number"
-                      placeholder="H"
+                      placeholder="T"
                       value={height}
                       onChange={(e) => setHeight(e.target.value)}
                       min="0"
@@ -305,11 +298,11 @@ export default function BookingPage() {
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Storage Duration
+                  Durasi Penyimpanan
                 </Label>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="startDate" className="text-sm text-muted-foreground">Start Date</Label>
+                    <Label htmlFor="startDate" className="text-sm text-muted-foreground">Tanggal Mulai</Label>
                     <Input
                       id="startDate"
                       type="date"
@@ -319,7 +312,7 @@ export default function BookingPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="endDate" className="text-sm text-muted-foreground">End Date</Label>
+                    <Label htmlFor="endDate" className="text-sm text-muted-foreground">Tanggal Selesai</Label>
                     <Input
                       id="endDate"
                       type="date"
@@ -338,10 +331,10 @@ export default function BookingPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calculator className="h-5 w-5 text-primary" />
-                Price Estimate
+                Estimasi Harga
               </CardTitle>
               <CardDescription>
-                Real-time pricing based on your item details
+                Harga realtime berdasarkan detail barang
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -351,39 +344,39 @@ export default function BookingPage() {
                   <div className="bg-primary/5 p-4 rounded-lg">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-primary">
-                        {calculation.days} {calculation.days === 1 ? 'Day' : 'Days'}
+                        {calculation.days} {calculation.days === 1 ? 'Hari' : 'Hari'}
                       </div>
-                      <div className="text-sm text-muted-foreground">Storage Duration</div>
+                      <div className="text-sm text-muted-foreground">Durasi Penyimpanan</div>
                     </div>
                   </div>
 
                   {/* Price Breakdown */}
                   <div className="space-y-3">
-                    <h3 className="font-semibold text-base">Price Breakdown:</h3>
+                    <h3 className="font-semibold text-base">Rincian Harga:</h3>
                     
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span>Base Rate ({calculation.days} days × $0.50)</span>
-                        <span>${calculation.baseRate.toFixed(2)}</span>
+                        <span>Tarif Dasar ({calculation.days} hari)</span>
+                        <span>{toIDR(calculation.baseRate)}</span>
                       </div>
                       
                       {calculation.volumeSurcharge > 0 && (
                         <div className="flex justify-between">
-                          <span>Volume Surcharge ({(volume/1000).toFixed(1)}k cm³)</span>
-                          <span>${calculation.volumeSurcharge.toFixed(2)}</span>
+                          <span>Biaya Volume ({(volume/1000).toFixed(1)}k cm³)</span>
+                          <span>{toIDR(calculation.volumeSurcharge)}</span>
                         </div>
                       )}
                       
                       {calculation.weightSurcharge > 0 && (
                         <div className="flex justify-between">
-                          <span>Weight Surcharge ({weight}kg)</span>
-                          <span>${calculation.weightSurcharge.toFixed(2)}</span>
+                          <span>Biaya Berat ({weight}kg)</span>
+                          <span>{toIDR(calculation.weightSurcharge)}</span>
                         </div>
                       )}
                       
                       {calculation.fragileMultiplier > 1 && (
                         <div className="flex justify-between text-orange-600">
-                          <span>Fragile Handling (+50%)</span>
+                          <span>Barang Rapuh (+50%)</span>
                           <span>×{calculation.fragileMultiplier}</span>
                         </div>
                       )}
@@ -393,14 +386,14 @@ export default function BookingPage() {
                     
                     {/* Total */}
                     <div className="flex justify-between items-center text-lg font-bold">
-                      <span>Total Price:</span>
+                      <span>Total Harga:</span>
                       <span className="text-2xl text-primary">
-                        ${calculation.totalPrice.toFixed(2)}
+                        {toIDR(calculation.totalPrice)}
                       </span>
                     </div>
                     
                     <div className="text-sm text-muted-foreground text-center">
-                      ≈ ${(calculation.totalPrice / calculation.days).toFixed(2)} per day
+                      ≈ {toIDR(calculation.totalPrice / calculation.days)} per hari
                     </div>
                   </div>
 
@@ -411,17 +404,17 @@ export default function BookingPage() {
                     onClick={handleProceedToCheckout}
                     disabled={!isFormValid}
                   >
-                    Proceed to Checkout
+                    Lanjut ke Checkout
                   </Button>
                 </div>
               ) : (
                 <div className="text-center py-8">
                   <Calculator className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-muted-foreground mb-2">
-                    Fill out the form to see your price estimate
+                    Isi form untuk lihat estimasi harga
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    All fields are required for accurate pricing
+                    Semua field wajib diisi supaya akurat
                   </p>
                 </div>
               )}
@@ -434,9 +427,9 @@ export default function BookingPage() {
           <Card className="text-center">
             <CardContent className="pt-6">
               <Package className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Secure Storage</h3>
+              <h3 className="font-semibold mb-2">Penyimpanan Aman</h3>
               <p className="text-sm text-muted-foreground">
-                24/7 security monitoring and climate-controlled environments
+                Keamanan 24/7 dan lingkungan terkontrol
               </p>
             </CardContent>
           </Card>
@@ -444,9 +437,9 @@ export default function BookingPage() {
           <Card className="text-center">
             <CardContent className="pt-6">
               <Calendar className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Flexible Duration</h3>
+              <h3 className="font-semibold mb-2">Durasi Fleksibel</h3>
               <p className="text-sm text-muted-foreground">
-                Store for days, weeks, or months. No long-term commitments required
+                Harian, mingguan, atau bulanan tanpa komitmen panjang
               </p>
             </CardContent>
           </Card>
@@ -454,9 +447,9 @@ export default function BookingPage() {
           <Card className="text-center">
             <CardContent className="pt-6">
               <AlertTriangle className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="font-semibold mb-2">Special Handling</h3>
+              <h3 className="font-semibold mb-2">Perlakuan Khusus</h3>
               <p className="text-sm text-muted-foreground">
-                Extra care for fragile items with specialized packaging and handling
+                Barang fragile diperlakukan ekstra hati-hati
               </p>
             </CardContent>
           </Card>

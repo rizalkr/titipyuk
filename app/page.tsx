@@ -9,7 +9,7 @@ import { Shield, MapPin, Clock, Star, Package, Users } from 'lucide-react'
 
 export default function HomePage() {
   const { user, loading } = useAuth()
-
+  console.log(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

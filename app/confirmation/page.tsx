@@ -7,6 +7,7 @@ import Navigation from '@/components/Navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, Calendar, Weight, Ruler, DollarSign, CheckCircle, Key, Copy } from 'lucide-react'
+import { toIDR } from '@/lib/utils'
 
 interface ConfirmationData {
   bookingId: string
@@ -78,12 +79,12 @@ export default function ConfirmationPage() {
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center">
           <Package className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-foreground mb-4">Access Denied</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-4">Akses Ditolak</h1>
           <p className="text-muted-foreground mb-8">
-            You need to be logged in to access this page.
+            Kamu harus login dulu untuk akses halaman ini.
           </p>
           <Button asChild>
-            <a href="/login">Login to Continue</a>
+            <a href="/login">Login Dulu</a>
           </Button>
         </div>
       </div>
@@ -96,12 +97,12 @@ export default function ConfirmationPage() {
         <Navigation />
         <div className="container mx-auto px-4 py-20 text-center">
           <Package className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
-          <h1 className="text-3xl font-bold text-foreground mb-4">No Booking Found</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-4">Booking Tidak Ditemukan</h1>
           <p className="text-muted-foreground mb-8">
-            We couldn't find your booking confirmation. Please check your dashboard.
+            Kami nggak nemu data konfirmasi kamu. Cek dashboard ya.
           </p>
           <Button asChild>
-            <a href="/dashboard">Go to Dashboard</a>
+            <a href="/dashboard">Ke Dashboard</a>
           </Button>
         </div>
       </div>
@@ -121,11 +122,10 @@ export default function ConfirmationPage() {
             </div>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Booking Successful! 🎉
+            Booking Berhasil! 🎉
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Your storage booking has been confirmed and payment processed successfully. 
-            Your items are now reserved and ready for drop-off.
+            Booking penyimpanan kamu sudah dikonfirmasi & pembayaran sukses. Barangmu sudah siap dititipkan.
           </p>
         </div>
 
@@ -135,10 +135,10 @@ export default function ConfirmationPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-green-800">
                 <Key className="h-5 w-5" />
-                Your Retrieval Password
+                Password Pengambilan
               </CardTitle>
               <CardDescription className="text-green-700">
-                <strong>IMPORTANT:</strong> Please save this password. You will need it to retrieve your items.
+                <strong>PENTING:</strong> Simpan password ini. Dibutuhkan saat ambil barang.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -154,13 +154,13 @@ export default function ConfirmationPage() {
                     className="text-green-700 border-green-300 hover:bg-green-50"
                   >
                     <Copy className="h-4 w-4 mr-2" />
-                    {passwordCopied ? 'Copied!' : 'Copy Password'}
+                    {passwordCopied ? 'Tersalin!' : 'Salin Password'}
                   </Button>
                 </div>
                 <div className="text-sm text-green-700 space-y-1">
-                  <p>• Write this password down in a safe place</p>
-                  <p>• Take a screenshot or photo of this page</p>
-                  <p>• You'll need this password when collecting your items</p>
+                  <p>• Catat / simpan password ini di tempat aman</p>
+                  <p>• Screenshot / foto halaman ini</p>
+                  <p>• Tunjukkan password saat ambil barang</p>
                 </div>
               </div>
             </CardContent>
@@ -171,28 +171,28 @@ export default function ConfirmationPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5 text-primary" />
-                Booking Confirmation
+                Konfirmasi Booking
               </CardTitle>
               <CardDescription>
-                Booking ID: <span className="font-mono">{confirmationData.bookingId}</span>
+                ID Booking: <span className="font-mono">{confirmationData.bookingId}</span>
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Item Details */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-base">Item Details</h3>
+                  <h3 className="font-semibold text-base">Detail Barang</h3>
                   
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-muted-foreground" />
-                        <span>Item Type</span>
+                        <span>Jenis Barang</span>
                       </div>
                       <span className="capitalize font-medium">
                         {confirmationData.bookingData.itemType}
                         {confirmationData.bookingData.itemType === 'fragile' && (
-                          <span className="text-orange-600 ml-1">(Special handling)</span>
+                          <span className="text-orange-600 ml-1">(Rapuh)</span>
                         )}
                       </span>
                     </div>
@@ -200,7 +200,7 @@ export default function ConfirmationPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Weight className="h-4 w-4 text-muted-foreground" />
-                        <span>Weight</span>
+                        <span>Berat</span>
                       </div>
                       <span className="font-medium">{confirmationData.bookingData.weight} kg</span>
                     </div>
@@ -208,7 +208,7 @@ export default function ConfirmationPage() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Ruler className="h-4 w-4 text-muted-foreground" />
-                        <span>Dimensions</span>
+                        <span>Dimensi</span>
                       </div>
                       <span className="font-medium">
                         {confirmationData.bookingData.length} × {confirmationData.bookingData.width} × {confirmationData.bookingData.height} cm
@@ -223,33 +223,33 @@ export default function ConfirmationPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-base">Storage Period</h3>
+                  <h3 className="font-semibold text-base">Periode Penyimpanan</h3>
                   
                   <div className="space-y-3 text-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>Start Date</span>
+                        <span>Mulai</span>
                       </div>
                       <span className="font-medium">
-                        {new Date(confirmationData.bookingData.startDate).toLocaleDateString()}
+                        {new Date(confirmationData.bookingData.startDate).toLocaleDateString('id-ID')}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>End Date</span>
+                        <span>Selesai</span>
                       </div>
                       <span className="font-medium">
-                        {new Date(confirmationData.bookingData.endDate).toLocaleDateString()}
+                        {new Date(confirmationData.bookingData.endDate).toLocaleDateString('id-ID')}
                       </span>
                     </div>
                     
                     <div className="flex items-center justify-between font-semibold">
-                      <span>Duration</span>
+                      <span>Durasi</span>
                       <span className="text-primary">
-                        {confirmationData.bookingData.calculation.days} {confirmationData.bookingData.calculation.days === 1 ? 'day' : 'days'}
+                        {confirmationData.bookingData.calculation.days} {confirmationData.bookingData.calculation.days === 1 ? 'hari' : 'hari'}
                       </span>
                     </div>
                   </div>
@@ -262,18 +262,18 @@ export default function ConfirmationPage() {
               <div className="space-y-4">
                 <h3 className="font-semibold text-base flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
-                  Payment Summary
+                  Ringkasan Pembayaran
                 </h3>
                 
                 <div className="bg-green-50/50 p-4 rounded-lg">
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold">Total Paid:</span>
+                    <span className="font-semibold">Total Dibayar:</span>
                     <span className="text-2xl font-bold text-green-800">
-                      ${confirmationData.totalAmount.toFixed(2)}
+                      {toIDR(confirmationData.totalAmount)}
                     </span>
                   </div>
                   <p className="text-sm text-green-700 mt-1">
-                    ✓ Payment completed successfully
+                    ✓ Pembayaran sukses
                   </p>
                 </div>
               </div>
@@ -283,9 +283,9 @@ export default function ConfirmationPage() {
           {/* Next Steps */}
           <Card>
             <CardHeader>
-              <CardTitle>What's Next?</CardTitle>
+              <CardTitle>Langkah Berikutnya</CardTitle>
               <CardDescription>
-                Follow these simple steps to complete your storage process
+                Ikuti langkah ini untuk selesaikan proses
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -295,9 +295,9 @@ export default function ConfirmationPage() {
                     <span className="text-primary font-bold text-sm">1</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Visit Our Location</h4>
+                    <h4 className="font-semibold mb-1">Datang ke Lokasi</h4>
                     <p className="text-sm text-muted-foreground">
-                      Come to TitipYuk Semarang within the next 7 days to drop off your items.
+                      Kunjungi TitipYuk Semarang dalam 7 hari untuk antar barang.
                     </p>
                   </div>
                 </div>
@@ -307,9 +307,9 @@ export default function ConfirmationPage() {
                     <span className="text-primary font-bold text-sm">2</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Bring Your Retrieval Password</h4>
+                    <h4 className="font-semibold mb-1">Bawa Password Pengambilan</h4>
                     <p className="text-sm text-muted-foreground">
-                      Present your password <strong>{confirmationData.retrievalPassword}</strong> to our staff.
+                      Tunjukkan password <strong>{confirmationData.retrievalPassword}</strong> ke staf kami.
                     </p>
                   </div>
                 </div>
@@ -319,9 +319,9 @@ export default function ConfirmationPage() {
                     <span className="text-primary font-bold text-sm">3</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-1">Secure Storage Begins</h4>
+                    <h4 className="font-semibold mb-1">Mulai Penyimpanan</h4>
                     <p className="text-sm text-muted-foreground">
-                      Your items will be safely stored in our climate-controlled facility.
+                      Barangmu akan kami simpan dengan aman sampai waktunya diambil.
                     </p>
                   </div>
                 </div>
@@ -332,11 +332,11 @@ export default function ConfirmationPage() {
           {/* Actions */}
           <div className="text-center space-y-4">
             <Button size="lg" onClick={handleReturnToDashboard}>
-              Return to Dashboard
+              Ke Dashboard
             </Button>
             
             <div className="text-sm text-muted-foreground">
-              <p>Need help? Contact us at <strong>support@titipyuk.com</strong> or call <strong>+62 24 1234567</strong></p>
+              <p>Butuh bantuan? Email <strong>support@titipyuk.com</strong> atau hubungi <strong>+62 24 1234567</strong></p>
             </div>
           </div>
         </div>

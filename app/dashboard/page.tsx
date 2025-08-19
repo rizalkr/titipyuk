@@ -8,6 +8,7 @@ import Navigation from '@/components/Navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Package, Plus, Calendar, MapPin, Key, Copy, CheckCircle, Clock, AlertTriangle } from 'lucide-react'
+import { toIDR } from '@/lib/utils'
 
 interface StorageBooking {
   id: string
@@ -152,8 +153,8 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">Please log in to access the dashboard.</p>
+          <h1 className="text-2xl font-bold text-foreground mb-4">Akses Ditolak</h1>
+          <p className="text-muted-foreground">Silakan login dulu untuk akses dashboard.</p>
         </div>
       </div>
     )
@@ -167,10 +168,10 @@ export default function DashboardPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome back, {user.email}!
+            Halo{userProfile?.full_name ? `, ${userProfile.full_name}` : `, ${user.email}`}! 👋
           </h1>
           <p className="text-muted-foreground">
-            Manage your stored items and bookings from your dashboard
+            Kelola semua titipan dan riwayat penyimpananmu di sini.
           </p>
         </div>
 
@@ -178,39 +179,39 @@ export default function DashboardPage() {
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Storage</CardTitle>
+              <CardTitle className="text-sm font-medium">Titipan Aktif</CardTitle>
               <Package className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.activeBookings}</div>
               <p className="text-xs text-muted-foreground">
-                items currently stored
+                barang lagi disimpan
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Pengeluaran</CardTitle>
               <Calendar className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">${stats.totalSpent.toFixed(2)}</div>
+              <div className="text-2xl font-bold">{toIDR(stats.totalSpent)}</div>
               <p className="text-xs text-muted-foreground">
-                total storage cost
+                total biaya penyimpanan
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Locations</CardTitle>
+              <CardTitle className="text-sm font-medium">Lokasi Dipakai</CardTitle>
               <MapPin className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.locationsUsed}</div>
               <p className="text-xs text-muted-foreground">
-                storage locations used
+                lokasi penyimpanan
               </p>
             </CardContent>
           </Card>
@@ -223,15 +224,13 @@ export default function DashboardPage() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>My Storage Bookings</CardTitle>
-                  <CardDescription>
-                    Manage your current and past storage bookings
-                  </CardDescription>
+                  <CardTitle>Titipan Saya</CardTitle>
+                  <CardDescription>Kelola titipan aktif & riwayatmu</CardDescription>
                 </div>
                 <Link href="/booking">
                   <Button>
                     <Plus className="h-4 w-4 mr-2" />
-                    New Booking
+                    Titip Baru
                   </Button>
                 </Link>
               </div>
@@ -240,19 +239,19 @@ export default function DashboardPage() {
               {bookingsLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-muted-foreground">Loading your bookings...</p>
+                  <p className="text-muted-foreground">Memuat data titipan...</p>
                 </div>
               ) : bookings.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No bookings yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">Belum ada titipan</h3>
                   <p className="text-muted-foreground mb-4">
-                    You haven't made any storage bookings. Start by creating your first booking!
+                    Kamu belum buat titipan. Yuk mulai sekarang!
                   </p>
                   <Link href="/booking">
                     <Button>
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Booking
+                      Buat Titipan Pertama
                     </Button>
                   </Link>
                 </div>
@@ -275,7 +274,11 @@ export default function DashboardPage() {
                               )}`}
                             >
                               {getStatusIcon(booking.status)}
-                              {booking.status}
+                              {booking.status === 'active' && 'aktif'}
+                              {booking.status === 'confirmed' && 'terkonfirmasi'}
+                              {booking.status === 'pending' && 'menunggu'}
+                              {booking.status === 'completed' && 'selesai'}
+                              {booking.status === 'cancelled' && 'batal'}
                             </span>
                           </div>
                           
@@ -283,8 +286,8 @@ export default function DashboardPage() {
                             <div className="flex items-center gap-2">
                               <Calendar className="h-4 w-4" />
                               <span>
-                                {new Date(booking.start_date).toLocaleDateString()} 
-                                {booking.end_date && ` - ${new Date(booking.end_date).toLocaleDateString()}`}
+                                {new Date(booking.start_date).toLocaleDateString('id-ID')} 
+                                {booking.end_date && ` - ${new Date(booking.end_date).toLocaleDateString('id-ID')}`}
                               </span>
                             </div>
                             
@@ -302,7 +305,7 @@ export default function DashboardPage() {
                             
                             <div className="flex items-center gap-2">
                               <span className="font-medium">
-                                ${booking.total_amount?.toFixed(2) || '0.00'}
+                                {toIDR(booking.total_amount)}
                               </span>
                             </div>
                           </div>
@@ -316,7 +319,7 @@ export default function DashboardPage() {
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <Key className="h-4 w-4 text-primary" />
-                                <span className="font-semibold text-primary">Retrieval Password</span>
+                                <span className="font-semibold text-primary">Password Pengambilan</span>
                               </div>
                               <div className="flex items-center gap-3">
                                 <code className="text-lg font-mono font-bold bg-background px-3 py-1 rounded border">
@@ -338,7 +341,7 @@ export default function DashboardPage() {
                             </div>
                           </div>
                           <p className="text-sm text-muted-foreground mt-2">
-                            You'll need this password to retrieve your stored items. Keep it safe!
+                            Simpan password ini baik-baik ya. Dibutuhkan saat ambil barang.
                           </p>
                         </div>
                       )}
@@ -352,29 +355,27 @@ export default function DashboardPage() {
           {/* Quick Actions */}
           <Card>
             <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-              <CardDescription>
-                Common actions you can take from your dashboard
-              </CardDescription>
+              <CardTitle>Aksi Cepat</CardTitle>
+              <CardDescription>Beberapa tindakan cepat buat kamu</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link href="/booking">
                 <Button className="w-full justify-start" size="lg" variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
-                  Book New Storage
+                  Titip Barang
                 </Button>
               </Link>
               <Button variant="outline" className="w-full justify-start" size="lg" disabled>
                 <Package className="h-4 w-4 mr-2" />
-                View My Items
+                Lihat Barang
               </Button>
               <Button variant="outline" className="w-full justify-start" size="lg" disabled>
                 <MapPin className="h-4 w-4 mr-2" />
-                Find Locations
+                Cari Lokasi
               </Button>
               <Button variant="outline" className="w-full justify-start" size="lg" disabled>
                 <Calendar className="h-4 w-4 mr-2" />
-                Schedule Pickup
+                Jadwal Pickup
               </Button>
             </CardContent>
           </Card>
@@ -383,10 +384,8 @@ export default function DashboardPage() {
         {/* Storage Guide */}
         <Card>
           <CardHeader>
-            <CardTitle>Getting Started with TitipYuk</CardTitle>
-            <CardDescription>
-              Follow these simple steps to start storing your items
-            </CardDescription>
+            <CardTitle>Panduan TitipYuk</CardTitle>
+            <CardDescription>Langkah sederhana buat mulai nitip</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-3 gap-6">
@@ -394,27 +393,27 @@ export default function DashboardPage() {
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary font-bold">1</span>
                 </div>
-                <h3 className="font-semibold mb-2">Calculate & Book</h3>
+                <h3 className="font-semibold mb-2">Hitung & Booking</h3>
                 <p className="text-sm text-muted-foreground">
-                  Use our price calculator to estimate costs and create a booking
+                  Pakai kalkulator buat estimasi harga lalu buat booking
                 </p>
               </div>
               <div className="text-center">
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary font-bold">2</span>
                 </div>
-                <h3 className="font-semibold mb-2">Get Your Password</h3>
+                <h3 className="font-semibold mb-2">Dapat Password</h3>
                 <p className="text-sm text-muted-foreground">
-                  Receive a unique retrieval password after payment confirmation
+                  Setelah bayar, kamu bakal terima password pengambilan
                 </p>
               </div>
               <div className="text-center">
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary font-bold">3</span>
                 </div>
-                <h3 className="font-semibold mb-2">Store & Retrieve</h3>
+                <h3 className="font-semibold mb-2">Simpan & Ambil</h3>
                 <p className="text-sm text-muted-foreground">
-                  Drop off your items and use your password to retrieve them later
+                  Antar barangmu dan ambil lagi kapan saja dengan password
                 </p>
               </div>
             </div>

@@ -1,64 +1,68 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Package, Eye, EyeOff } from 'lucide-react'
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Package, Eye, EyeOff } from "lucide-react";
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState('')
-  const [fullName, setFullName] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [message, setMessage] = useState('')
-  const { signUp } = useAuth()
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const { signUp } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
-    setMessage('')
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    setMessage("");
 
     if (!email || !password || !fullName.trim()) {
-      setError('Please fill in all fields')
-      setLoading(false)
-      return
+      setError("Isi semua field dulu ya");
+      setLoading(false);
+      return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters long')
-      setLoading(false)
-      return
+      setError("Password minimal 6 karakter ya");
+      setLoading(false);
+      return;
     }
 
-    const { data, error } = await signUp(email, password, fullName.trim())
+    const { user, error } = await signUp(email, password, fullName.trim());
 
     if (error) {
-      if (error.message.includes('User already registered')) {
-        setError('An account with this email already exists. Please try logging in instead.')
+      if (error.message.includes("User already registered")) {
+        setError("Email ini sudah terdaftar. Coba login aja ya.");
       } else {
-        setError(error.message)
+        setError(error.message);
       }
-    } else if (data.user) {
-      if (data.user.email_confirmed_at) {
-        // User is immediately confirmed
-        router.push('/dashboard')
+    } else if (user) {
+      if ((user as any).email_confirmed_at) {
+        router.push("/dashboard");
       } else {
-        // User needs to confirm email
-        setMessage('Account created successfully! Please check your email for the confirmation link.')
+        setMessage("Akun berhasil dibuat! Cek email kamu buat konfirmasi ya.");
       }
     }
 
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-muted/50">
@@ -72,9 +76,11 @@ export default function SignUpPage() {
 
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-bold">Create Your Account</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              Buat Akun Baru 🚀
+            </CardTitle>
             <CardDescription>
-              Join TitipYuk Semarang and start storing your items securely
+              Gabung TitipYuk dan mulai titip barang dengan aman & gampang
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -84,7 +90,7 @@ export default function SignUpPage() {
                   {error}
                 </div>
               )}
-              
+
               {message && (
                 <div className="bg-green-50 text-green-600 text-sm p-3 rounded-md">
                   {message}
@@ -92,7 +98,7 @@ export default function SignUpPage() {
               )}
 
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full Name</Label>
+                <Label htmlFor="fullName">Nama Lengkap</Label>
                 <Input
                   id="fullName"
                   name="fullName"
@@ -100,12 +106,12 @@ export default function SignUpPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Enter your full name"
+                  placeholder="Masukkan nama lengkap kamu"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email address</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   name="email"
@@ -114,7 +120,7 @@ export default function SignUpPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder="Masukkan email kamu"
                 />
               </div>
 
@@ -124,12 +130,12 @@ export default function SignUpPage() {
                   <Input
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     autoComplete="new-password"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a password (min. 6 characters)"
+                    placeholder="Buat password (min. 6 karakter)"
                   />
                   <button
                     type="button"
@@ -145,20 +151,19 @@ export default function SignUpPage() {
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={loading}
-              >
-                {loading ? 'Creating Account...' : 'Create Account'}
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Lagi bikin akun..." : "Daftar"}
               </Button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
-                  Sign in here
+                Sudah punya akun?{" "}
+                <Link
+                  href="/login"
+                  className="text-primary hover:text-primary/80 font-medium"
+                >
+                  Masuk di sini
                 </Link>
               </p>
             </div>
@@ -166,11 +171,14 @@ export default function SignUpPage() {
         </Card>
 
         <div className="text-center">
-          <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
-            ← Back to homepage
+          <Link
+            href="/"
+            className="text-sm text-muted-foreground hover:text-foreground"
+          >
+            ← Kembali ke beranda
           </Link>
         </div>
       </div>
     </div>
-  )
+  );
 }
