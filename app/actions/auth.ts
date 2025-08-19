@@ -38,6 +38,22 @@ export async function serverSignUp(email: string, password: string, fullName?: s
     password,
     options: fullName ? { data: { full_name: fullName } } : undefined,
   })
+
+  const customOtpEnabled = process.env.NEXT_PUBLIC_ENABLE_CUSTOM_OTP === 'true'
+
+  // Only trigger custom OTP if enabled and user not yet confirmed
+  if (customOtpEnabled && !error && data.user && !data.user.email_confirmed_at) {
+    try {
+      await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/auth/request-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+    } catch (e) {
+      console.warn('Failed auto request OTP after signup', e)
+    }
+  }
+
   return { user: data?.user ?? null, session: data?.session ?? null, error }
 }
 
@@ -45,4 +61,30 @@ export async function serverSignOut() {
   const supabase = getServerClient()
   const { error } = await supabase.auth.signOut()
   return { error }
+}
+
+export async function serverRequestOtp(email: string) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/auth/request-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    })
+    return await res.json()
+  } catch (e: any) {
+    return { error: e.message }
+  }
+}
+
+export async function serverVerifyOtp(email: string, code: string) {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ''}/api/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code })
+    })
+    return await res.json()
+  } catch (e: any) {
+    return { error: e.message }
+  }
 }

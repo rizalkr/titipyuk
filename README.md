@@ -126,6 +126,46 @@ Fitur:
 - Riwayat & pemilihan percakapan lama
 - Logging pesan ke tabel `chat_messages` (migration sudah disiapkan)
 
+## Custom Email OTP (Mailry)
+
+Alur verifikasi email kustom menggantikan email konfirmasi default Supabase:
+1. User signup -> server action `serverSignUp` otomatis memanggil endpoint `/api/auth/request-otp` (jika belum verified).
+2. OTP (6 digit numeric) disimpan hashed (`bcrypt`) di tabel `email_otp_tokens` dengan masa berlaku 10 menit.
+3. Email dikirim via Mailry API (gunakan `MAILRY_API_KEY`).
+4. User input kode OTP di layar signup (form berubah menjadi mode verifikasi) -> kirim ke `/api/auth/verify-otp`.
+5. Endpoint verifikasi cocokkan hash, cek expiry & attempts; jika valid: tandai token used (`mark_email_otp_used`) dan update `profiles.email_verified = true`.
+6. Middleware blokir akses route protected kalau `email_verified = false` (redirect kembali ke `/signup`).
+
+Rate limiting dasar:
+- Request OTP maksimal 1x per 60 detik per email.
+- Tiap kode punya `max_attempts` default 5; salah menambah `attempts`.
+
+Tabel & fungsi:
+- `email_otp_tokens` (migration: `20250819140000_add_email_otp_tokens.sql` + index & kolom `email_verified` di profiles pada migration `20250819150000_add_email_verification_and_otp_indexes.sql`).
+- Function `mark_email_otp_used` dan optional `increment_email_otp_attempt`.
+
+Env tambahan:
+- `MAILRY_API_KEY` = API key Mailry.
+- (Opsional) `NEXT_PUBLIC_BASE_URL` untuk server actions memanggil endpoint internal saat SSR (isi dengan origin penuh, contoh: `http://localhost:3000` di dev, atau produksi domain Vercel). Jika tidak diisi fallback relative (bisa gagal di server action tertentu). Disarankan set.
+
+Endpoint:
+- `POST /api/auth/request-otp` body: `{ email }`
+- `POST /api/auth/verify-otp` body: `{ email, code }`
+
+UI:
+- `app/signup/page.tsx` otomatis berubah ke mode input OTP setelah signup sukses & belum verified.
+
+Keamanan:
+- OTP selalu disimpan hashed.
+- Respon generic untuk minimalkan enumerasi user.
+- Middleware hanya mengizinkan navigasi protected jika user dan `email_verified = true`.
+
+TODO lanjutan (opsional):
+- Tambah logging audit.
+- Tambah captcha/hCaptcha untuk request OTP.
+- Tambah cron job purge OTP kadaluarsa (function sudah ada: `purge_expired_email_otps`).
+- Implement exponential backoff/resend limit harian.
+
 ## Project Structure
 
 ```
