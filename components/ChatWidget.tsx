@@ -8,6 +8,17 @@ interface ChatMessage {
   content: string
 }
 
+// Very small markdown bold parser for **text** patterns
+function renderMessageContent(content: string) {
+  const parts = content.split(/(\*\*[^*]+\*\*)/g) // keep delimiters
+  return parts.map((part, idx) => {
+    if (/^\*\*[^*]+\*\*$/.test(part)) {
+      return <strong key={idx}>{part.slice(2, -2)}</strong>
+    }
+    return <span key={idx}>{part}</span>
+  })
+}
+
 export default function ChatWidget() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -77,7 +88,7 @@ export default function ChatWidget() {
             {messages.map((m, i) => (
               <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
                 <div className={`inline-block rounded-lg px-3 py-2 max-w-[80%] whitespace-pre-wrap ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                  {m.content}
+                  {m.role === 'assistant' ? renderMessageContent(m.content) : m.content}
                 </div>
               </div>
             ))}
