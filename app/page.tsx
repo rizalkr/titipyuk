@@ -22,49 +22,49 @@ export default function HomePage() {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      {/* Hero Section */}
+      {/* Bagian Hero */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-6">
-            Store Your Items Safely in{' '}
+            Simpan Barangmu Dengan Aman di{' '}
             <span className="text-primary">Semarang</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            TitipYuk provides secure, convenient, and affordable item storage solutions 
-            throughout Semarang. Store anything from documents to personal belongings.
+            TitipYuk menyediakan solusi penyimpanan barang yang aman, nyaman, dan terjangkau 
+            di seluruh Semarang. Simpan apa saja, mulai dari dokumen hingga barang-barang pribadi Anda.
           </p>
           <div className="flex gap-4 justify-center">
             {user ? (
-              <Link href="/dashboard">
+              <Link href="/booking">
                 <Button size="lg" className="px-8">
-                  Go to Dashboard
+                  Mulai Titipkan Barangmu
                 </Button>
               </Link>
             ) : (
               <Link href="/signup">
                 <Button size="lg" className="px-8">
-                  Start Storing Your Items
+                  Mulai Titipkan Barangmu
                 </Button>
               </Link>
             )}
             <Link href="#features">
               <Button variant="outline" size="lg" className="px-8">
-                Learn More
+                Pelajari Lebih Lanjut
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Bagian Fitur */}
       <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-              Why Choose TitipYuk?
+              Mengapa Memilih TitipYuk?
             </h2>
             <p className="text-xl text-muted-foreground">
-              Three key reasons why TitipYuk is the best choice for your storage needs
+              Tiga alasan utama mengapa TitipYuk adalah pilihan terbaik untuk kebutuhan penyimpanan Anda
             </p>
           </div>
           
@@ -72,12 +72,12 @@ export default function HomePage() {
             <Card>
               <CardHeader className="text-center">
                 <Shield className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>Secure Storage</CardTitle>
+                <CardTitle>Penyimpanan Aman</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-center">
-                  Your items are protected with 24/7 security monitoring, 
-                  climate control, and comprehensive insurance coverage.
+                  Barang Anda dilindungi dengan pemantauan keamanan 24/7, 
+                  kontrol suhu, dan perlindungan asuransi yang komprehensif.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -85,12 +85,12 @@ export default function HomePage() {
             <Card>
               <CardHeader className="text-center">
                 <MapPin className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>Prime Locations</CardTitle>
+                <CardTitle>Lokasi Strategis</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-center">
-                  Multiple storage locations across Semarang for easy access. 
-                  All locations are strategically placed near public transportation.
+                  Berbagai lokasi penyimpanan di seluruh Semarang untuk akses yang mudah. 
+                  Semua lokasi berada di dekat transportasi umum.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -98,12 +98,12 @@ export default function HomePage() {
             <Card>
               <CardHeader className="text-center">
                 <Clock className="h-12 w-12 text-primary mx-auto mb-4" />
-                <CardTitle>Flexible Access</CardTitle>
+                <CardTitle>Akses Fleksibel</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-center">
-                  Access your items anytime with our 24/7 access policy. 
-                  Book pickup and drop-off services through our platform.
+                  Akses barang Anda kapan saja dengan kebijakan akses 24/7 kami. 
+                  Pesan layanan antar-jemput melalui platform kami.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -111,7 +111,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Stats Section */}
+      {/* Bagian Statistik */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto">
           <div className="grid md:grid-cols-3 gap-8 text-center">
@@ -120,52 +120,52 @@ export default function HomePage() {
                 <Users className="h-8 w-8 text-primary mr-2" />
                 <span className="text-4xl font-bold text-foreground">1000+</span>
               </div>
-              <p className="text-muted-foreground">Happy Customers</p>
+              <p className="text-muted-foreground">Pelanggan Puas</p>
             </div>
             <div>
               <div className="flex items-center justify-center mb-4">
                 <Package className="h-8 w-8 text-primary mr-2" />
                 <span className="text-4xl font-bold text-foreground">5000+</span>
               </div>
-              <p className="text-muted-foreground">Items Stored</p>
+              <p className="text-muted-foreground">Barang Tersimpan</p>
             </div>
             <div>
               <div className="flex items-center justify-center mb-4">
                 <Star className="h-8 w-8 text-primary mr-2" />
                 <span className="text-4xl font-bold text-foreground">4.9</span>
               </div>
-              <p className="text-muted-foreground">Average Rating</p>
+              <p className="text-muted-foreground">Rating Rata-rata</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
+      {/* Bagian Harga */}
       <section id="pricing" className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/50">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-4">
-              Simple, Transparent Pricing
+              Harga Simpel dan Transparan
             </h2>
             <p className="text-xl text-muted-foreground">
-              No hidden fees. Pay only for what you need.
+              Tanpa biaya tersembunyi. Bayar hanya untuk yang Anda butuhkan.
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <Card>
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Small Box</CardTitle>
+                <CardTitle className="text-2xl">Kotak Kecil</CardTitle>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">Rp 25K</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/bulan</span>
                 </div>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription>
-                  Perfect for documents, small electronics, and personal items.
+                  Sempurna untuk dokumen, elektronik kecil, dan barang-barang pribadi.
                   <br />
-                  <strong>Size:</strong> 30×20×15 cm
+                  <strong>Ukuran:</strong> 30×20×15 cm
                 </CardDescription>
               </CardContent>
             </Card>
@@ -173,36 +173,36 @@ export default function HomePage() {
             <Card className="border-primary">
               <CardHeader className="text-center">
                 <div className="bg-primary text-primary-foreground text-sm py-1 px-3 rounded-full inline-block mb-2">
-                  Most Popular
+                  Paling Populer
                 </div>
-                <CardTitle className="text-2xl">Medium Box</CardTitle>
+                <CardTitle className="text-2xl">Kotak Sedang</CardTitle>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">Rp 45K</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/bulan</span>
                 </div>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription>
-                  Great for clothes, books, and medium-sized items.
+                  Cocok untuk pakaian, buku, dan barang berukuran sedang.
                   <br />
-                  <strong>Size:</strong> 50×40×30 cm
+                  <strong>Ukuran:</strong> 50×40×30 cm
                 </CardDescription>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Large Box</CardTitle>
+                <CardTitle className="text-2xl">Kotak Besar</CardTitle>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">Rp 75K</span>
-                  <span className="text-muted-foreground">/month</span>
+                  <span className="text-muted-foreground">/bulan</span>
                 </div>
               </CardHeader>
               <CardContent className="text-center">
                 <CardDescription>
-                  Ideal for furniture, large electronics, and bulk items.
+                  Ideal untuk perabotan, elektronik besar, dan barang dalam jumlah besar.
                   <br />
-                  <strong>Size:</strong> 80×60×50 cm
+                  <strong>Ukuran:</strong> 80×60×50 cm
                 </CardDescription>
               </CardContent>
             </Card>
@@ -212,13 +212,13 @@ export default function HomePage() {
             {user ? (
               <Link href="/dashboard">
                 <Button size="lg" className="px-8">
-                  Book Your Storage
+                  Pesan Penyimpanan Anda
                 </Button>
               </Link>
             ) : (
               <Link href="/signup">
                 <Button size="lg" className="px-8">
-                  Get Started Today
+                  Mulai Hari Ini
                 </Button>
               </Link>
             )}
@@ -226,7 +226,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Footer */}
+      {/* Bagian Footer */}
       <footer className="bg-background border-t py-8 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto text-center">
           <div className="flex items-center justify-center mb-4">
@@ -234,7 +234,7 @@ export default function HomePage() {
             <span className="font-bold text-lg">TitipYuk Semarang</span>
           </div>
           <p className="text-muted-foreground">
-            © 2025 TitipYuk Semarang. All rights reserved.
+            © 2025 TitipYuk Semarang. Hak cipta dilindungi undang-undang.
           </p>
         </div>
       </footer>

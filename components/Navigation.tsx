@@ -44,6 +44,12 @@ export default function Navigation() {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
+                <Link href="/booking">
+                  <Button variant="outline" size="sm">
+                    <Package className="h-4 w-4 mr-2" />
+                    Book Storage
+                  </Button>
+                </Link>
                 <Link href="/dashboard">
                   <Button variant="outline" size="sm">
                     <User className="h-4 w-4 mr-2" />

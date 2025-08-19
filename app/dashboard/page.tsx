@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useAuth } from '@/hooks/useAuth'
 import Navigation from '@/components/Navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -99,10 +100,12 @@ export default function DashboardPage() {
               <div className="text-center py-8">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground mb-4">No activities yet</p>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Store Your First Item
-                </Button>
+                <Link href="/booking">
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Store Your First Item
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
@@ -116,10 +119,12 @@ export default function DashboardPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button className="w-full justify-start" size="lg">
-                <Plus className="h-4 w-4 mr-2" />
-                Book New Storage
-              </Button>
+              <Link href="/booking">
+                <Button className="w-full justify-start" size="lg">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Book New Storage
+                </Button>
+              </Link>
               <Button variant="outline" className="w-full justify-start" size="lg">
                 <Package className="h-4 w-4 mr-2" />
                 View My Items
