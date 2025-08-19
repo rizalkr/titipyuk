@@ -12,6 +12,7 @@ import { Package, Eye, EyeOff } from 'lucide-react'
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('')
+  const [fullName, setFullName] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -26,7 +27,7 @@ export default function SignUpPage() {
     setError('')
     setMessage('')
 
-    if (!email || !password) {
+    if (!email || !password || !fullName.trim()) {
       setError('Please fill in all fields')
       setLoading(false)
       return
@@ -38,17 +39,21 @@ export default function SignUpPage() {
       return
     }
 
-    const { data, error } = await signUp(email, password)
+    const { data, error } = await signUp(email, password, fullName.trim())
 
     if (error) {
-      setError(error.message)
+      if (error.message.includes('User already registered')) {
+        setError('An account with this email already exists. Please try logging in instead.')
+      } else {
+        setError(error.message)
+      }
     } else if (data.user) {
       if (data.user.email_confirmed_at) {
         // User is immediately confirmed
         router.push('/dashboard')
       } else {
         // User needs to confirm email
-        setMessage('Please check your email for the confirmation link before signing in.')
+        setMessage('Account created successfully! Please check your email for the confirmation link.')
       }
     }
 
@@ -85,6 +90,19 @@ export default function SignUpPage() {
                   {message}
                 </div>
               )}
+
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                />
+              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email address</Label>

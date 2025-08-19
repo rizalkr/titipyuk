@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/hooks/useAuth'
 import Navigation from '@/components/Navigation'
 import { Button } from '@/components/ui/button'
@@ -20,6 +21,7 @@ interface PriceCalculation {
 
 export default function BookingPage() {
   const { user, loading } = useAuth()
+  const router = useRouter()
   
   // Form state
   const [itemType, setItemType] = useState<'normal' | 'fragile'>('normal')
@@ -124,8 +126,23 @@ export default function BookingPage() {
   }
 
   const handleProceedToCheckout = () => {
-    // This will be implemented in the next phase
-    alert('Checkout functionality will be implemented in the next phase!')
+    if (!calculation || !isFormValid) return
+    
+    // Store booking data in sessionStorage to pass to checkout page
+    const bookingData = {
+      itemType,
+      weight: parseFloat(weight),
+      length: parseFloat(length),
+      width: parseFloat(width),
+      height: parseFloat(height),
+      volume,
+      startDate,
+      endDate,
+      calculation
+    }
+    
+    sessionStorage.setItem('bookingData', JSON.stringify(bookingData))
+    router.push('/checkout')
   }
 
   return (

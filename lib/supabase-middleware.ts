@@ -54,18 +54,30 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // Refresh session if expired
+  await supabase.auth.getSession()
+  
+  const { data: { user } } = await supabase.auth.getUser()
 
-  // Protect dashboard routes
-  if (!user && (request.nextUrl.pathname.startsWith('/dashboard') || request.nextUrl.pathname.startsWith('/booking'))) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  const protectedPaths = ['/dashboard', '/booking', '/checkout', '/confirmation']
+  const authPaths = ['/login', '/signup']
+  const currentPath = request.nextUrl.pathname
+
+  // Check if current path needs protection
+  const isProtectedPath = protectedPaths.some(path => currentPath.startsWith(path))
+  const isAuthPath = authPaths.includes(currentPath)
+
+  // Protect dashboard and booking routes
+  if (isProtectedPath && !user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('redirectTo', currentPath)
+    return NextResponse.redirect(loginUrl)
   }
 
   // Redirect authenticated users away from auth pages
-  if (user && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (isAuthPath && user) {
+    const redirectTo = request.nextUrl.searchParams.get('redirectTo') || '/dashboard'
+    return NextResponse.redirect(new URL(redirectTo, request.url))
   }
 
   return response

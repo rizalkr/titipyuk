@@ -30,21 +30,25 @@ export default function LoginPage() {
       return
     }
 
-    const { data, error } = await signIn(email, password)
+    try {
+      const { error } = await signIn(email, password)
 
-    if (error) {
-      if (error.message === 'Invalid login credentials') {
-        setError('Invalid email or password. Please try again.')
-      } else if (error.message === 'Email not confirmed') {
-        setError('Please check your email and click the confirmation link before signing in.')
+      if (error) {
+        if (error.message === 'Invalid login credentials') {
+          setError('Invalid email or password. Please try again.')
+        } else if (error.message === 'Email not confirmed') {
+          setError('Please check your email and click the confirmation link before signing in.')
+        } else {
+          setError(error.message)
+        }
       } else {
-        setError(error.message)
+        router.push('/')
       }
-    } else if (data.user) {
-      router.push('/dashboard')
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.')
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   return (

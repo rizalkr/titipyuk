@@ -154,6 +154,7 @@ export type Database = {
           item_value: number | null
           location_id: string
           payment_status: string | null
+          retrieval_password: string | null
           start_date: string
           status: string | null
           total_amount: number | null
@@ -169,6 +170,7 @@ export type Database = {
           item_value?: number | null
           location_id: string
           payment_status?: string | null
+          retrieval_password?: string | null
           start_date: string
           status?: string | null
           total_amount?: number | null
@@ -184,6 +186,7 @@ export type Database = {
           item_value?: number | null
           location_id?: string
           payment_status?: string | null
+          retrieval_password?: string | null
           start_date?: string
           status?: string | null
           total_amount?: number | null
