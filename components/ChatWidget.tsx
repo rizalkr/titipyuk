@@ -29,12 +29,54 @@ export default function ChatWidget() {
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [loadingHistory, setLoadingHistory] = useState(false)
   const scrollRef = useRef<HTMLDivElement | null>(null)
+  const historyAutoLoadedRef = useRef(false)
+
+  // Load stored conversationId (persist across reloads)
+  useEffect(() => {
+    try {
+      const stored = typeof window !== 'undefined' ? localStorage.getItem('titipyuk_conversation_id') : null
+      if (stored) setConversationId(stored)
+    } catch {}
+  }, [])
+
+  // Persist conversationId
+  useEffect(() => {
+    try {
+      if (conversationId) localStorage.setItem('titipyuk_conversation_id', conversationId)
+    } catch {}
+  }, [conversationId])
+
+  const loadHistory = async () => {
+    if (!conversationId || loadingHistory) return
+    setLoadingHistory(true)
+    try {
+      const res = await fetch(`/api/chat/history?conversationId=${conversationId}`)
+      const data = await res.json()
+      if (Array.isArray(data.messages)) {
+        setMessages(data.messages as ChatMessage[])
+      }
+    } catch {/* ignore */} finally { setLoadingHistory(false); historyAutoLoadedRef.current = true }
+  }
+
+  // Auto load history when widget opened first time
+  useEffect(() => {
+    if (open && conversationId && messages.length === 0 && !historyAutoLoadedRef.current) {
+      loadHistory()
+    }
+  }, [open, conversationId, messages.length])
 
   useEffect(() => {
     if (open && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
   }, [messages, open])
+
+  const newConversation = () => {
+    setMessages([])
+    setConversationId(null)
+    historyAutoLoadedRef.current = false
+    try { localStorage.removeItem('titipyuk_conversation_id') } catch {}
+  }
 
   const send = async () => {
     if (!input.trim() || loading) return
@@ -113,18 +155,6 @@ export default function ChatWidget() {
     }
   }
 
-  const loadHistory = async () => {
-    if (!conversationId || loadingHistory) return
-    setLoadingHistory(true)
-    try {
-      const res = await fetch(`/api/chat/history?conversationId=${conversationId}`)
-      const data = await res.json()
-      if (Array.isArray(data.messages)) {
-        setMessages(data.messages as ChatMessage[])
-      }
-    } catch {/* ignore */} finally { setLoadingHistory(false) }
-  }
-
   return (
     <>
       <button
@@ -135,23 +165,27 @@ export default function ChatWidget() {
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 w-80 md:w-96 h-[420px] bg-background border rounded-lg shadow-xl flex flex-col">
+        <div className="fixed bottom-24 right-4 z-50 w-80 md:w-96 h-[440px] bg-background border rounded-lg shadow-xl flex flex-col">
           <div className="p-3 border-b flex items-center justify-between gap-2">
             <span className="font-semibold text-sm">Asisten TitipYuk</span>
-            <label className="flex items-center gap-1 text-xs cursor-pointer select-none">
-              <input type="checkbox" checked={streamMode} onChange={e => setStreamMode(e.target.checked)} /> Stream
-            </label>
-            <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
-              <X className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={newConversation} title="Percakapan baru" className="text-xs underline text-primary">Baru</button>
+              <label className="flex items-center gap-1 text-xs cursor-pointer select-none">
+                <input type="checkbox" checked={streamMode} onChange={e => setStreamMode(e.target.checked)} /> Stream
+              </label>
+              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
           </div>
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-3 text-sm">
             {messages.length === 0 && !conversationId && (
               <div className="text-muted-foreground text-xs">Tanya apa aja soal TitipYuk (harga, proses, dsb). 🙌</div>
             )}
-            {messages.length === 0 && conversationId && (
+            {messages.length === 0 && conversationId && !loadingHistory && (
               <button onClick={loadHistory} className="text-xs underline text-primary disabled:opacity-50" disabled={loadingHistory}>{loadingHistory ? 'Memuat...' : 'Muat riwayat percakapan'}</button>
             )}
+            {loadingHistory && <div className="text-xs text-muted-foreground">Memuat riwayat...</div>}
             {messages.map((m, i) => (
               <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
                 <div className={`inline-block rounded-lg px-3 py-2 max-w-[80%] whitespace-pre-wrap ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
