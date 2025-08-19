@@ -6,6 +6,7 @@ import { MessageCircle, X, Send } from 'lucide-react'
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
+  streaming?: boolean
 }
 
 // Very small markdown bold parser for **text** patterns
@@ -24,6 +25,7 @@ export default function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [streamMode, setStreamMode] = useState(true)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -37,12 +39,21 @@ export default function ChatWidget() {
     const userMsg: ChatMessage = { role: 'user', content: input.trim() }
     setMessages(prev => [...prev, userMsg])
     setInput('')
+
+    if (streamMode) {
+      await streamSend([...messages, userMsg])
+    } else {
+      await normalSend([...messages, userMsg])
+    }
+  }
+
+  const normalSend = async (all: ChatMessage[]) => {
     setLoading(true)
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, userMsg] })
+        body: JSON.stringify({ messages: all })
       })
       const data = await res.json()
       if (data.reply?.content) {
@@ -52,6 +63,41 @@ export default function ChatWidget() {
       }
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Error jaringan.' }])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const streamSend = async (all: ChatMessage[]) => {
+    setLoading(true)
+    const idxRef = { idx: -1 }
+    setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
+    try {
+      const res = await fetch('/api/chat/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: all })
+      })
+      if (!res.body) throw new Error('No stream')
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        const chunk = decoder.decode(value)
+        setMessages(prev => {
+          const clone = [...prev]
+          const lastIndex = clone.findIndex(m => m.streaming)
+          if (lastIndex !== -1) {
+            clone[lastIndex] = { ...clone[lastIndex], content: clone[lastIndex].content + chunk }
+          }
+          return clone
+        })
+      }
+      // finalize
+      setMessages(prev => prev.map(m => m.streaming ? { ...m, streaming: false } : m))
+    } catch (e) {
+      setMessages(prev => prev.map(m => m.streaming ? { ...m, content: (m.content || '') + '\n[Stream error]' , streaming: false } : m))
     } finally {
       setLoading(false)
     }
@@ -74,9 +120,12 @@ export default function ChatWidget() {
         {open ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
       </button>
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 w-80 md:w-96 h-96 bg-background border rounded-lg shadow-xl flex flex-col">
-          <div className="p-3 border-b flex items-center justify-between">
+        <div className="fixed bottom-24 right-4 z-50 w-80 md:w-96 h-[420px] bg-background border rounded-lg shadow-xl flex flex-col">
+          <div className="p-3 border-b flex items-center justify-between gap-2">
             <span className="font-semibold text-sm">Asisten TitipYuk</span>
+            <label className="flex items-center gap-1 text-xs cursor-pointer select-none">
+              <input type="checkbox" checked={streamMode} onChange={e => setStreamMode(e.target.checked)} /> Stream
+            </label>
             <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground">
               <X className="h-4 w-4" />
             </button>
@@ -89,10 +138,11 @@ export default function ChatWidget() {
               <div key={i} className={m.role === 'user' ? 'text-right' : 'text-left'}>
                 <div className={`inline-block rounded-lg px-3 py-2 max-w-[80%] whitespace-pre-wrap ${m.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
                   {m.role === 'assistant' ? renderMessageContent(m.content) : m.content}
+                  {m.streaming && <span className="animate-pulse">▍</span>}
                 </div>
               </div>
             ))}
-            {loading && <div className="text-xs text-muted-foreground">Mengetik...</div>}
+            {loading && !streamMode && <div className="text-xs text-muted-foreground">Mengetik...</div>}
           </div>
           <div className="p-3 border-t flex gap-2">
             <input
