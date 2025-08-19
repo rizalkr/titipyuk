@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 
 // Build a focused knowledge context from site content (static base, then enriched dynamically)
 function buildSiteContext() {
@@ -82,6 +83,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}))
     const userMessages = Array.isArray(body.messages) ? body.messages : []
+    const conversationId = body.conversationId || randomUUID()
     const limit = 12
     const trimmed = userMessages.slice(-limit)
 
@@ -101,7 +103,17 @@ export async function POST(req: Request) {
       }
     }
 
-    // Dynamic context
+    // Log latest user message (only the last one user appended)
+    const lastUser = [...trimmed].reverse().find(m => m.role === 'user')
+    if (lastUser) {
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        user_id: userId || null,
+        role: 'user',
+        content: String(lastUser.content).slice(0, 4000)
+      })
+    }
+
     const siteContext = buildSiteContext()
     const dynamicContext = await buildDynamicContext(supabase)
 
@@ -124,7 +136,18 @@ export async function POST(req: Request) {
 
     const answer = completion.choices[0]?.message || { role: 'assistant', content: 'Maaf, aku lagi nggak bisa jawab.' }
 
-    return NextResponse.json({ reply: answer, usage: completion.usage })
+    // Log assistant answer
+    if (answer.content) {
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        user_id: userId || null,
+        role: 'assistant',
+        content: String(answer.content).slice(0, 8000),
+        model: 'gpt-4o'
+      })
+    }
+
+    return NextResponse.json({ reply: answer, usage: completion.usage, conversationId })
   } catch (e: any) {
     console.error('Chat API error:', e)
     return NextResponse.json({ error: e.message || 'Server error' }, { status: 500 })

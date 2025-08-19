@@ -26,6 +26,7 @@ export default function ChatWidget() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const [streamMode, setStreamMode] = useState(true)
+  const [conversationId, setConversationId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
@@ -53,9 +54,10 @@ export default function ChatWidget() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: all })
+        body: JSON.stringify({ messages: all, conversationId })
       })
       const data = await res.json()
+      if (data.conversationId && !conversationId) setConversationId(data.conversationId)
       if (data.reply?.content) {
         setMessages(prev => [...prev, { role: 'assistant', content: data.reply.content }])
       } else if (data.error) {
@@ -70,14 +72,15 @@ export default function ChatWidget() {
 
   const streamSend = async (all: ChatMessage[]) => {
     setLoading(true)
-    const idxRef = { idx: -1 }
     setMessages(prev => [...prev, { role: 'assistant', content: '', streaming: true }])
     try {
       const res = await fetch('/api/chat/stream', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: all })
+        body: JSON.stringify({ messages: all, conversationId })
       })
+      const headerConv = res.headers.get('x-conversation-id')
+      if (headerConv && !conversationId) setConversationId(headerConv)
       if (!res.body) throw new Error('No stream')
       const reader = res.body.getReader()
       const decoder = new TextDecoder()
@@ -94,7 +97,6 @@ export default function ChatWidget() {
           return clone
         })
       }
-      // finalize
       setMessages(prev => prev.map(m => m.streaming ? { ...m, streaming: false } : m))
     } catch (e) {
       setMessages(prev => prev.map(m => m.streaming ? { ...m, content: (m.content || '') + '\n[Stream error]' , streaming: false } : m))

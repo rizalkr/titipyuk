@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { randomUUID } from 'crypto'
 
 function buildSiteContext() {
   return `KONTEKS TITIPYUK (STREAM): Jawab hanya terkait penitipan TitipYuk, gaya santai, jangan keluar topik.`
@@ -22,6 +23,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}))
     const userMessages = Array.isArray(body.messages) ? body.messages : []
+    const conversationId = body.conversationId || randomUUID()
 
     const supabase = createSupabaseForServer()
     const { data: sessionData } = await supabase.auth.getSession()
@@ -37,15 +39,23 @@ export async function POST(req: Request) {
       if (profile?.full_name) profileSnippet = `Nama user: ${profile.full_name}`
     }
 
+    // Log user message (last)
+    const lastUser = [...userMessages].reverse().find(m => m.role === 'user')
+    if (lastUser) {
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        user_id: userId || null,
+        role: 'user',
+        content: String(lastUser.content).slice(0, 4000)
+      })
+    }
+
     const client = new OpenAI({
       apiKey: process.env.LUNOS_API_KEY!,
       baseURL: process.env.LUNOS_BASE_URL || 'https://api.lunos.tech/v1'
     })
 
     const systemPrompt = `${buildSiteContext()}\n${profileSnippet}`.trim()
-
-    // Using legacy chat.completions does not support stream in this SDK version reliable on edge; fallback to responses if available
-    // We'll attempt using responses API (gpt-4o-mini or similar) for streaming tokens.
 
     const response = await client.chat.completions.create({
       model: 'openai/gpt-4o-mini',
@@ -56,9 +66,10 @@ export async function POST(req: Request) {
         ...userMessages.map((m: any) => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content).slice(0, 1500) }))
       ],
       max_tokens: 600,
-    } as any) // casting because stream flag may not be typed on this version
+    } as any)
 
     const encoder = new TextEncoder()
+    let collected = ''
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -66,9 +77,21 @@ export async function POST(req: Request) {
           for await (const part of response as any) {
             const delta = part?.choices?.[0]?.delta?.content
             if (delta) {
+              collected += delta
               controller.enqueue(encoder.encode(delta))
             }
           }
+          // Log assistant full answer after stream ends
+          if (collected) {
+            await supabase.from('chat_messages').insert({
+              conversation_id: conversationId,
+              user_id: userId || null,
+              role: 'assistant',
+              content: collected.slice(0, 8000),
+              model: 'gpt-4o-mini'
+            })
+          }
+          // Send a terminator JSON meta event (optional) could use SSE; here we ignore.
           controller.close()
         } catch (err: any) {
           controller.error(err)
@@ -76,7 +99,7 @@ export async function POST(req: Request) {
       }
     })
 
-    return new Response(stream, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
+    return new Response(stream, { headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Conversation-Id': conversationId } })
   } catch (e: any) {
     console.error('Stream chat error:', e)
     return NextResponse.json({ error: e.message || 'Server error' }, { status: 500 })
